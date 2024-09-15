@@ -1,0 +1,165 @@
+# %%
+import nltk # type: ignore
+from nltk.tokenize import sent_tokenize, word_tokenize # type: ignore
+from nltk.corpus import stopwords # type: ignore
+from collections import Counter
+import docx # type: ignore
+from sklearn.decomposition import LatentDirichletAllocation # type: ignore
+from sklearn.feature_extraction.text import CountVectorizer# type: ignore
+from textblob import TextBlob# type: ignore
+nltk.download('punkt')
+nltk.download('stopwords')
+
+#* Функция для чтения документа Word
+def load_text_from_word(file_path):
+    doc = docx.Document(file_path)
+    word_doc = []
+    for paragraph in doc.paragraphs:
+        if paragraph.text.strip():
+            word_doc.append(paragraph.text)
+    return word_doc
+
+#* Функция для расчета перплексии
+def compute_perplexity(X, num_topics_range):
+    perplexities = []
+    for num_topics in num_topics_range:
+        lda = LatentDirichletAllocation(n_components=num_topics, random_state=0)
+        lda.fit(X)
+        perplexities.append(lda.perplexity(X))
+    return perplexities
+
+#* Функция для расчета захламленности текста
+def analyze_cluster(file_path):
+    #* Загрузка текста из файла Word
+    word_doc = ' '.join(load_text_from_word(file_path))
+    
+    #* Токенизация предложений и слов
+    sentences = sent_tokenize(word_doc, language='english') # Токенизация предложений
+    words = word_tokenize(word_doc) # Токенизация слов
+
+    #* Определение вводных слов
+    filter_words = set(["actually", "basically", "just", "kind of", "like", "really", "so", "you know", "sort of", "well", "literally", "totally", "maybe", "perhaps"])
+
+    #* Поиск вводных слов
+    cluster_phrases = [phrase for phrase in filter_words if phrase in word_doc]
+    num_cluster_phrases = len(cluster_phrases)
+
+    #* Длина предложений
+    sentence_len = [len(word_tokenize(sentence)) for sentence in sentences]
+    avg_sentence_len = sum(sentence_len) / len(sentence_len) if sentences else 0
+
+    #* Повторение слов
+    stop_words = set(stopwords.words('english'))
+    meaningful_words = [word for word in words if word.isalpha() and word not in stop_words]
+    word_counts = Counter(meaningful_words)
+    most_common = word_counts.most_common(5)
+
+    #* Оценка захламленности
+    clutter_score = 0
+    max_clutter_score = 10
+
+    #* Вводные слова: каждый найденный +2 балла
+    clutter_score += num_cluster_phrases * 2
+
+    #* Проверка на длину предложений
+    if avg_sentence_len > 20:
+        clutter_score += 3
+
+    #* Повторение слов: если 5 самых частых слов встречаются более 10 раз +2 балла
+    if any(count > 10 for word, count in most_common):
+        clutter_score += 2
+
+    #* Ограничение на максимальный балл
+    clutter_score = min(clutter_score, max_clutter_score)
+    
+    if clutter_score > 0 and clutter_score < 5:
+        clutter_mark = ("Текст хорошо структурирован, лишние фразы отсутствуют или встречаются редко")
+    elif clutter_score > 6 and clutter_score < 10:
+        clutter_mark = ("Умеренное количество лишних фраз, но текст все еще воспринимается нормально")
+    else:
+        clutter_mark = ("Высокая загроможденность, текст трудно читать из-за большого количества лишних слов")
+
+    return (
+        f"Результаты анализа:\n\n"
+        f"1. Количество вводных или лишних фраз: {num_cluster_phrases}\n"
+        f"2. Средняя длина предложения: {avg_sentence_len:.2f} слов\n"
+        f"3. Наиболее часто используемые слова: {', '.join([word for word, freq in most_common])}\n"
+        f"4. Оценка загроможденности текста: {clutter_score:.2f}\n"
+        f"5. Интерпретация оценки загроможденности текста: {clutter_mark}"
+    )
+
+#*Функция для оценки сентимента(настроения) текста
+def analyze_sentiment(file_path):
+    #* Загрузка и подготовка текста
+    document = load_text_from_word(file_path)
+    document_text = ' '.join(document)
+    
+    #* Ввожу переменную blob
+    blob = TextBlob(document_text)
+    sentiment = blob.sentiment
+    
+    #* Оценка настроения
+    polarity = sentiment.polarity  # От -1 (негатив) до 1 (позитив)
+    sentiment.subjectivity  # От 0 (факты) до 1 (мнение)
+    
+    #* Определение тональности
+    if polarity > 0:
+        return f"6. Позитивное настроение (Полярность: {polarity:.2f})"
+    elif polarity < 0:
+        return f"6. Негативное настроение (Полярность: {polarity:.2f})"
+    else:
+        return "6. Нейтральное настроение"
+
+#* Функция для обработки текста для LDA
+def process_text(file_path):
+    #* Загрузка и подготовка текста
+    document = load_text_from_word(file_path)
+    document_text = ' '.join(document)  # Объединяем абзацы в один текст
+
+    #* Подготовка данных
+    vectorizer = CountVectorizer(stop_words='english')
+    X = vectorizer.fit_transform([document_text])  # Преобразуем текст в матрицу частот
+
+    num_topics_range = range(2, 10)  # Пробуем от 2 до 10 тем
+
+    #* Вычисление перплексии для разных значений количества тем
+    perplexities = compute_perplexity(X, num_topics_range)
+
+    #* Определение оптимального количества тем
+    optimal_num_topics = num_topics_range[perplexities.index(min(perplexities))]
+
+    if optimal_num_topics < 3:
+        optimal_num_topics = 3
+
+    lda = LatentDirichletAllocation(n_components=optimal_num_topics, random_state=0)
+    lda.fit(X)
+
+    #* Извлечение ключевых слов для каждой темы
+    terms = vectorizer.get_feature_names_out()
+    unique_topics = {}
+    topic_keywords = {}
+
+    for i, topic in enumerate(lda.components_):
+        top_terms_idx = topic.argsort()[-10:][::-1]
+        top_terms = [terms[idx] for idx in top_terms_idx]
+        hashtags = ' '.join([f"#{term}" for term in top_terms])
+
+        if hashtags not in unique_topics:
+            unique_topics[hashtags] = i
+            topic_keywords[i] = hashtags
+
+    #* Печать уникальных тем
+    print(" ")
+    print(f"Количество тем: {optimal_num_topics - 1}")
+    for i, keywords in topic_keywords.items():
+        print(f" Для темы {i + 1} ключевыми словами являются: {keywords}")
+
+file_path = "C:\\Users\\User-Максим\\Desktop\\LDA.docx"
+print(analyze_cluster(file_path))
+print(analyze_sentiment(file_path))
+process_text(file_path)
+
+# %% [markdown]
+# 
+
+

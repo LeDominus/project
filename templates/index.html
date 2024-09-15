@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Семантический анализ текста</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Анализ текста из документа</h1>
+        
+        <form action="/analyze" method="post" enctype="multipart/form-data">
+            <label for="file">Выбрать файл Word:</label>
+            <input type="file" id="file" name="file" accept=".docx" required>
+            <button type="submit">Анализ</button>
+        </form>
+
+        {% if cluster_result is not none %}
+        <div class="results">
+            <div class="results-content">
+                <div class="result-box">
+                    <h3>Результаты текстового анализа:</h3>
+                    <pre>{{ cluster_result }}</pre>
+                </div>
+                <div class="result-box">
+                    <h3>Результаты семантического анализ:</h3>
+                    <pre>{{ sentiment_result }}</pre>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
+
+
+
+
