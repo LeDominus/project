@@ -1,38 +1,276 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Семантический анализ текста</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="/static/styles.css">  
+    <title>Семантический лингвистический анализ текста</title>
+    <style>
+        /* Основной контейнер с колонками */
+        .container {
+            display: flex;
+            flex-direction: column; /* Ставим элементы в столбик */
+            align-items: center;
+            padding: 20px;
+            width: 90%; /* Увеличиваем ширину */
+            margin: 0 auto; /* Выравниваем по центру */
+        }
+
+        /* Левая колонка для ключевых слов */
+        .sidebar {
+            width: 100%;
+            max-width: 800px; /* Ограничиваем максимальную ширину */
+            border: 2px solid #ccc;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8); /* Прозрачный фон */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Заголовок в контейнере */
+        .sidebar h2 {
+            text-align: center;
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+            background-color: rgba(0, 0, 0, 0.05); /* Лёгкий фон для текста */
+            padding: 10px;
+        }
+
+        /* Входные поля и кнопки в контейнере */
+        .sidebar input[type="text"],
+        .sidebar input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+        }
+
+        /* Кнопка для выбора файла по центру */
+        .sidebar input[type="file"] {
+            display: block;
+            margin: 0 auto 10px auto; /* Центрирование кнопки */
+        }
+
+        /* Кнопка для анализа увеличенного размера */
+        .sidebar button {
+            width: 300px; /* Ширина кнопки */
+            height: 50px; /* Высота кнопки */
+            padding: 15px; /* Внутренние отступы */
+            font-size: 16px; /* Размер шрифта */
+            margin-top: 10px;
+        }
+
+        /* Правая колонка для результатов */
+        .content {
+            width: 100%;
+            max-width: 1000px; /* Ограничиваем максимальную ширину */
+            padding: 20px;
+        }
+
+        /* Оформление формы */
+        form {
+            margin-top: 20px;
+        }
+
+        /* Стиль для результатов анализа в виде таблицы */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .results-table th,
+        .results-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .results-table th {
+            background-color: #f4f4f4;
+            text-align: left;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        h2 {
+            margin-top: 30px;
+            color: #444;
+        }
+
+        /* Общие стили для кнопок */
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Центральное размещение кнопок и полей */
+        .center-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Контейнер для ключевых слов */
+        .keyword-container {
+            width: 100%;
+            max-width: 800px; /* Ограничиваем максимальную ширину */
+            margin: 0 auto;
+            margin-bottom: 20px;
+        }
+
+        .keyword-container textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        /* Контейнер для найденных слов */
+        .found-words-container {
+            width: 100%;
+            max-width: 800px; /* Ограничиваем максимальную ширину */
+            margin: 0 auto;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .found-words-container h3 {
+            margin-top: 0;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Анализ текста из документа</h1>
-        
-        <form action="/analyze" method="post" enctype="multipart/form-data">
-            <label for="file">Выбрать файл Word:</label>
-            <input type="file" id="file" name="file" accept=".docx" required>
-            <button type="submit">Анализ</button>
-        </form>
+    <h1>Анализ семантики текста</h1>
 
-        {% if cluster_result is not none %}
-        <div class="results">
-            <div class="results-content">
-                <div class="result-box">
-                    <h3>Результаты текстового анализа:</h3>
-                    <pre>{{ cluster_result }}</pre>
-                </div>
-                <div class="result-box">
-                    <h3>Результаты семантического анализ:</h3>
-                    <pre>{{ sentiment_result }}</pre>
-                </div>
+    <!-- Основной контейнер с колонками -->
+    <div class="container">
+        <!-- Левая колонка с формой -->
+        <div class="sidebar">
+            <h2>Загрузите файл и выполните анализ</h2>
+
+            <!-- Форма для загрузки файла и кнопки -->
+            <div class="center-container">
+                <form action="/analyze" method="post" enctype="multipart/form-data">
+                    <label for="file">Выберите файл (Word):</label>
+                    <input type="file" name="file" id="file" accept=".doc,.docx" required>
+
+                    <button type="submit">Анализировать</button>
+                </form>
+            </div>
+
+            <!-- Контейнер для ввода ключевых слов -->
+            <div class="keyword-container">
+                <h2>Ключевые слова</h2>
+                <label for="keywords">Введите ключевые слова:</label>
+                <textarea id="keywords" name="keywords" placeholder="Введите ключевые слова..."></textarea>
+                <!-- Кнопка для анализа ключевых слов -->
+                <button type="button" onclick="analyzeKeywords()">Проанализировать ключевые слова</button>
+            </div>
+            
+            <!-- Контейнер для отображения найденных слов -->
+            <div class="found-words-container" id="found-words-container">
+                <h3>Найденные ключевые слова:</h3>
+                <!-- Здесь будут отображаться найденные слова -->
+                <div id="found-words"></div>
             </div>
         </div>
-        {% endif %}
+
+        <!-- Правая колонка для результатов анализа -->
+        <div class="content">
+            <hr>
+
+            <!-- Результаты анализа -->
+            {% if cluster_result %}
+            <h2>Результаты текстового анализа:</h2>
+            <table class="results-table">
+                <thead>
+                    <tr><th>Показатель</th><th>Результат</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Количество вводных или лишних фраз</td><td>{{ cluster_result.num_cluster_phrases }}</td></tr>
+                    <tr><td>Средняя длина предложения</td><td>{{ "{:.2f}".format(cluster_result.avg_sentence_len) }} слов</td></tr>
+                    <tr><td>Наиболее часто используемые слова</td><td>{{ cluster_result.most_common_words }}</td></tr>
+                    <tr><td>Оценка загроможденности текста</td><td>{{ "{:.2f}".format(cluster_result.clutter_score) }}</td></tr>
+                    <tr><td>Интерпретация оценки загроможденности текста</td><td>{{ cluster_result.clutter_mark }}</td></tr>
+                </tbody>
+            </table>
+            {% endif %}
+
+            {% if sentiment_result %}
+            <h2>Результаты анализа настроения:</h2>
+            <table class="results-table">
+                <thead>
+                    <tr><th>Метод</th><th>Результат</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Позитивное настроение</td><td>{{ sentiment_result }}</td></tr>
+                </tbody>
+            </table>
+            {% endif %}
+
+            {% if topics_result %}
+            <h2>Результаты анализа тем:</h2>
+            <table class="results-table">
+                <thead>
+                    <tr><th>Тема</th><th>Ключевые слова</th></tr>
+                </thead>
+                <tbody>
+                    {% for topic_id, keywords in topics_result.topic_keywords.items() %}
+                    <tr><td>Тема {{ topic_id + 1 }}</td><td>{{ keywords }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
     </div>
+
+    <script>
+        function analyzeKeywords() {
+            const keywords = document.getElementById('keywords').value.split(',').map(kw => kw.trim());
+            const foundWordsContainer = document.getElementById('found-words');
+            foundWordsContainer.innerHTML = ''; // Очистить предыдущие результаты
+
+            // Пример списка слов для поиска (этот список можно заменить на свой)
+            const allWords = ["пример", "анализ", "текст", "слово"];
+
+            // Поиск ключевых слов
+            keywords.forEach(keyword => {
+                if (allWords.includes(keyword)) {
+                    const div = document.createElement('div');
+                    div.textContent = keyword;
+                    foundWordsContainer.appendChild(div);
+                }
+            });
+
+            // Если не найдено ни одно ключевое слово
+            if (foundWordsContainer.innerHTML === '') {
+                foundWordsContainer.textContent = 'Ключевые слова не найдены.';
+            }
+        }
+    </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
 
 
 

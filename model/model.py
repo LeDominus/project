@@ -1,5 +1,5 @@
 # %%
-import nltk # type: ignore
+import nltk  # type: ignore
 from nltk.tokenize import sent_tokenize, word_tokenize # type: ignore
 from nltk.corpus import stopwords # type: ignore
 from collections import Counter
@@ -7,8 +7,15 @@ import docx # type: ignore
 from sklearn.decomposition import LatentDirichletAllocation # type: ignore
 from sklearn.feature_extraction.text import CountVectorizer# type: ignore
 from textblob import TextBlob# type: ignore
+import re
 nltk.download('punkt')
 nltk.download('stopwords')
+
+#* Функция для нахождения слов в текста
+def find_words(text, user_query):
+    words = re.findall(r'\b\w+\b', text)
+    query_matches = [word for word in words if user_query.lower() in word.lower()]
+    return query_matches
 
 #* Функция для чтения документа Word
 def load_text_from_word(file_path):
@@ -79,14 +86,15 @@ def analyze_cluster(file_path):
     else:
         clutter_mark = ("Высокая загроможденность, текст трудно читать из-за большого количества лишних слов")
 
-    return (
-        f"Результаты анализа:\n\n"
-        f"1. Количество вводных или лишних фраз: {num_cluster_phrases}\n"
-        f"2. Средняя длина предложения: {avg_sentence_len:.2f} слов\n"
-        f"3. Наиболее часто используемые слова: {', '.join([word for word, freq in most_common])}\n"
-        f"4. Оценка загроможденности текста: {clutter_score:.2f}\n"
-        f"5. Интерпретация оценки загроможденности текста: {clutter_mark}"
-    )
+    # Формирование словаря с результатами
+    return {
+        "num_cluster_phrases": num_cluster_phrases,
+        "avg_sentence_len": avg_sentence_len,
+        "most_common_words": ', '.join([word for word, freq in most_common]),
+        "clutter_score": clutter_score,
+        "clutter_mark": clutter_mark
+    }
+    
 
 #*Функция для оценки сентимента(настроения) текста
 def analyze_sentiment(file_path):
@@ -104,11 +112,11 @@ def analyze_sentiment(file_path):
     
     #* Определение тональности
     if polarity > 0:
-        return f"6. Позитивное настроение (Полярность: {polarity:.2f})"
+        return f"Позитивное настроение (Полярность: {polarity:.2f})"
     elif polarity < 0:
-        return f"6. Негативное настроение (Полярность: {polarity:.2f})"
+        return f"Негативное настроение (Полярность: {polarity:.2f})"
     else:
-        return "6. Нейтральное настроение"
+        return "Нейтральное настроение"
 
 #* Функция для обработки текста для LDA
 def process_text(file_path):
@@ -154,10 +162,16 @@ def process_text(file_path):
     for i, keywords in topic_keywords.items():
         print(f" Для темы {i + 1} ключевыми словами являются: {keywords}")
 
+def search_words_in_text(file_path, user_query):
+    word_doc = ' '.join(load_text_from_word(file_path))
+    matches = find_words(word_doc, user_query)
+    return f"Слово {user_query} встречается {len(matches)} раз"
+
 file_path = "C:\\Users\\User-Максим\\Desktop\\LDA.docx"
 print(analyze_cluster(file_path))
 print(analyze_sentiment(file_path))
 process_text(file_path)
+
 
 # %% [markdown]
 # 
