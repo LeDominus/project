@@ -2,7 +2,7 @@ import os
 import sys
 from flask import Flask, render_template, jsonify, request, session # type: ignore
 
-# Добавляем корневую папку проекта в sys.path
+#* Добавляем корневую папку проекта в sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from model.model import analyze_cluster, analyze_sentiment, process_text, search_words_in_text
@@ -32,26 +32,26 @@ def analyze_text():
         file.save(file_path)
 
         try:
-            # Анализ текста
+            #* Анализ текста
             cluster_result = analyze_cluster(file_path)
             sentiment_result = analyze_sentiment(file_path)
             topics_result = process_text(file_path)           
             
-            # Сохраняем путь к файлу в сессии
+            #* Сохраняю путь к файлу в сессии
             session['file_path'] = file_path
 
-            # Поиск слова
+            #* Поиск слова
             search_word = request.form.get("search_word")
             word_search_result = None
             
             if search_word:
-                with open(file_path, 'r', encoding='utf-8') as f:  # Убедитесь, что используете правильную кодировку
+                with open(file_path, 'r', encoding='utf-8') as f:
                     file_content = f.read()
                 word_search_result = search_words_in_text(file_content, search_word)
         except Exception as e:
             return render_template("index.html", cluster_result=f"Ошибка при анализе: {str(e)}", sentiment_result=None, word_search_result=None)
         finally:
-            # Удаление временного файла
+            #* Удаление временного файла
             if os.path.exists(file_path):
                 os.remove(file_path)
 
@@ -67,10 +67,9 @@ def search_keywords():
     user_queries = data.get('user_query', [])
     file_path = "C:\\Users\\User-Максим\\Desktop\\LDA.docx"
     
-    # Обработка каждого ключевого слова
+    #* Обработка каждого ключевого слова
     results = []
     for query in user_queries:
-        # Замените 'path_to_your_document.docx' на путь к вашему файлу
         sentences_with_keyword = search_words_in_text(file_path, query)
         results.extend(sentences_with_keyword)
     
