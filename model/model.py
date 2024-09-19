@@ -40,7 +40,10 @@ def analyze_cluster(file_path):
     words = word_tokenize(word_doc) # Токенизация слов
 
     #* Определение вводных слов
-    filter_words = set(["actually", "basically", "just", "kind of", "like", "really", "so", "you know", "sort of", "well", "literally", "totally", "maybe", "perhaps"])
+    filter_words = set([
+        "actually", "basically", "just", "kind of", "like", "really", "so", "you know", "sort of", "well", "literally", "totally", "maybe", "perhaps"
+        "Moreover", "Namely", "Nevertheless", "On the other hand", "Quite", "Rather", "So", "That is to say", "To sum up", "Truly", "Ultimately"
+])
 
     #* Поиск вводных слов
     cluster_phrases = [phrase for phrase in filter_words if phrase in word_doc]

@@ -50,10 +50,7 @@ def analyze_text():
                 word_search_result = search_words_in_text(file_content, search_word)
         except Exception as e:
             return render_template("index.html", cluster_result=f"Ошибка при анализе: {str(e)}", sentiment_result=None, word_search_result=None)
-        finally:
-            #* Удаление временного файла
-            if os.path.exists(file_path):
-                os.remove(file_path)
+
 
         return render_template("index.html", 
                                cluster_result=cluster_result,
@@ -65,7 +62,9 @@ def analyze_text():
 def search_keywords():
     data = request.get_json()
     user_queries = data.get('user_query', [])
-    file_path = "C:\\Users\\User-Максим\\Desktop\\LDA.docx"
+    
+    #* Получаю путь к последнему загруженному файлу
+    file_path = session.get('file_path')
     
     #* Обработка каждого ключевого слова
     results = []
@@ -78,4 +77,4 @@ def search_keywords():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
