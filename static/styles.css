@@ -1,101 +1,199 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f9;
-    color: #333;
+/* Основной контейнер с колонками */
+.container {
+    display: flex;
+    flex-direction: column; /* Ставим элементы в столбик */
+    align-items: center;
+    padding: 30px; /* Увеличиваем отступы для лучшего вида */
+    width: 100%; /* Увеличиваем ширину */
+    margin: 0 auto; /* Выравниваем по центру */
+    background-color: #f0f0f0; /* Легкий фон для всей страницы */
 }
 
-.container {
-    width: 80%;
-    max-width: 800px;
-    margin: 0 auto;
+/* Левая колонка для ключевых слов */
+.sidebar {
+    width: 90%;
+    max-width: 1000px; /* Ограничиваем максимальную ширину */
+    border: 1px solid #ddd;
     padding: 20px;
+    background-color: #ffffff; /* Белый фон для контента */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Легкая тень для глубины */
+    border-radius: 12px; /* Скругляем углы */
+    transition: box-shadow 0.3s ease; /* Плавный переход для тени */
+    display: flex;
+    flex-direction: column; /* Располагаем элементы в столбик */
+    align-items: center; /* Выравнивание по центру */
+}
+
+.sidebar input[type="file"] {
+    margin-bottom: 8px; /* Отступ снизу */
+}
+
+/* Наведение курсора на колонку */
+.sidebar:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Более выраженная тень при наведении */
+}
+
+/* Заголовок в контейнере */
+.sidebar h3 {
+    text-align: center;
+    font-size: 20px; /* Увеличенный размер шрифта */
+    font-weight: bold; /* Сделать текст жирным */
+    color: #333;
+    margin-bottom: 20px;
+    background-color: #f9f9f9; /* Лёгкий фон для заголовка */
+    padding: 15px;
+    border-radius: 8px; /* Скругляем углы заголовка */
+}
+
+/* Входные поля и кнопки в контейнере */
+.sidebar input[type="text"],
+.sidebar input[type="file"] {
+    width: calc(100% - 22px);
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px; /* Скругляем углы полей ввода */
+    background-color: #fafafa; /* Лёгкий фон для полей ввода */
+}
+
+/* Кнопка для выбора файла по центру */
+.sidebar input[type="file"] {
+    display: block;
+    margin: 0 auto 12px auto; /* Центрирование кнопки */
+}
+
+/* Кнопка для анализа увеличенного размера */
+.sidebar button {
+    width: 300px; /* Ширина кнопки */
+    height: 50px; /* Высота кнопки */
+    padding: 12px; /* Внутренние отступы */
+    font-size: 16px; /* Размер шрифта */
+    margin-top: 15px;
+    border-radius: 8px; /* Скругляем углы кнопки */
+    border: none; /* Убираем границу кнопки */
+    background-color: #4CAF50; /* Основной цвет кнопки */
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Плавный переход для фона кнопки */
+}
+
+/* Наведение курсора на кнопку */
+.sidebar button:hover {
+    background-color: #45a049; /* Цвет кнопки при наведении */
+}
+
+/* Правая колонка для результатов */
+.content {
+    width: 100%;
+    max-width: 1000px; /* Ограничиваем максимальную ширину */
+    padding: 20px;
+}
+
+/* Оформление формы */
+form {
+    margin-top: 30px;
+}
+
+/* Стиль для результатов анализа в виде таблицы */
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+    background-color: #ffffff; /* Белый фон для таблицы */
+    border-radius: 8px; /* Скругляем углы таблицы */
+    overflow: hidden; /* Обрезаем тени и скругления для таблицы */
+}
+
+.results-table th,
+.results-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+}
+
+.results-table th {
+    background-color: #f4f4f4;
+    text-align: left;
 }
 
 h1 {
     text-align: center;
-    color: #2c3e50;
-    margin-top: 20px;
-}
-
-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 30px;
-}
-
-label {
-    font-size: 16px;
-    margin-bottom: 10px;
-}
-
-input[type="file"] {
+    color: #333;
     margin-bottom: 20px;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
-    background-color: #fff;
-}
-
-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    background-color: #3498db;
-    color: #fff;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-button:hover {
-    background-color: #2980b9;
-}
-
-.results {
-    text-align: left;
-    margin-top: 30px;
-}
-
-.results-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.result-box {
-    width: 80%;
-    max-width: 800px;
-    margin: 10px 0;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 20px;
+    font-size: 28px; /* Увеличенный размер шрифта для заголовка */
 }
 
 h2 {
-    color: #3498db;
-    margin-bottom: 20px;
+    margin-top: 30px;
+    color: #555; /* Немного светлее цвет заголовка */
+    font-size: 24px; /* Увеличенный размер шрифта для заголовка */
 }
 
-h3 {
-    color: #2ecc71;
-    margin-bottom: 10px;
+/* Общие стили для кнопок */
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto; /* Центрирование кнопок */
+    border-radius: 8px; /* Скругляем углы кнопок */
+    padding: 12px 20px; /* Увеличиваем внутренние отступы */
+    transition: background-color 0.3s ease; /* Плавный переход для фона кнопки */
 }
 
-pre {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 10px;
-    white-space: pre-wrap; /* To handle long text wrapping */
-    word-wrap: break-word;
-    max-width: 100%;
+button:hover {
+    background-color: #45a049; /* Цвет кнопки при наведении */
+}
+
+/* Центральное размещение кнопок и полей */
+.center-container {
+    text-align: center;
+    margin-bottom: 30px; /* Увеличиваем отступ для лучшего вида */
+}
+
+/* Контейнер для ключевых слов */
+.keyword-container {
+    width: 100%;
+    max-width: 800px; /* Ограничиваем максимальную ширину */
     margin: 0 auto;
+    margin-bottom: 30px; /* Увеличиваем отступ снизу */
 }
+
+.keyword-container textarea {
+    width: 100%;
+    height: 120px; /* Увеличиваем высоту текстового поля */
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px; /* Скругляем углы текстового поля */
+    background-color: #fafafa; /* Лёгкий фон для текстового поля */
+}
+
+/* Контейнер для найденных слов */
+.found-words-container {
+    width: 100%;
+    max-width: 800px; /* Ограничиваем максимальную ширину */
+    margin: 0 auto;
+    margin-top: 30px; /* Увеличиваем отступ сверху */
+    padding: 15px; /* Увеличиваем внутренние отступы */
+    border: 1px solid #ddd;
+    border-radius: 8px; /* Скругляем углы контейнера */
+    background-color: #ffffff; /* Белый фон для контейнера */
+}
+
+.found-words-container h3 {
+    margin-top: 0;
+    font-weight: bold; /* Сделать текст жирным */
+    font-size: 18px; /* Размер шрифта для заголовка */
+}
+
+/* Стиль для выделения ключевых слов */
+.highlight {
+    background-color: #b6ecc1; /* Желтый фон для выделения */
+    color: #000; /* Черный цвет текста */
+    font-weight: bold; /* Жирный текст */
+}
+
+
 
 
 

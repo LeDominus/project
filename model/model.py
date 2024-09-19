@@ -11,11 +11,6 @@ import re
 nltk.download('punkt')
 nltk.download('stopwords')
 
-#* Функция для нахождения слов в текста
-def find_words(text, user_query):
-    words = re.findall(r'\b\w+\b', text)
-    query_matches = [word for word in words if user_query.lower() in word.lower()]
-    return query_matches
 
 #* Функция для чтения документа Word
 def load_text_from_word(file_path):
@@ -86,7 +81,7 @@ def analyze_cluster(file_path):
     else:
         clutter_mark = ("Высокая загроможденность, текст трудно читать из-за большого количества лишних слов")
 
-    # Формирование словаря с результатами
+    #* Формирование словаря с результатами
     return {
         "num_cluster_phrases": num_cluster_phrases,
         "avg_sentence_len": avg_sentence_len,
@@ -122,13 +117,13 @@ def analyze_sentiment(file_path):
 def process_text(file_path):
     #* Загрузка и подготовка текста
     document = load_text_from_word(file_path)
-    document_text = ' '.join(document)  # Объединяем абзацы в один текст
+    document_text = ' '.join(document)  # Объединяю абзацы в один текст
 
     #* Подготовка данных
     vectorizer = CountVectorizer(stop_words='english')
-    X = vectorizer.fit_transform([document_text])  # Преобразуем текст в матрицу частот
+    X = vectorizer.fit_transform(document)  # Преобразую текст в матрицу частот
 
-    num_topics_range = range(2, 10)  # Пробуем от 2 до 10 тем
+    num_topics_range = range(1, 10)  # Пробую от 2 до 10 тем
 
     #* Вычисление перплексии для разных значений количества тем
     perplexities = compute_perplexity(X, num_topics_range)
@@ -154,18 +149,30 @@ def process_text(file_path):
 
         if hashtags not in unique_topics:
             unique_topics[hashtags] = i
-            topic_keywords[i] = hashtags
-
-    #* Печать уникальных тем
-    print(" ")
-    print(f"Количество тем: {optimal_num_topics - 1}")
-    for i, keywords in topic_keywords.items():
-        print(f" Для темы {i + 1} ключевыми словами являются: {keywords}")
+            topic_keywords[i] = top_terms
+    return {
+        'topic_count': optimal_num_topics,
+        'topic_keywords': topic_keywords
+    }
 
 def search_words_in_text(file_path, user_query):
-    word_doc = ' '.join(load_text_from_word(file_path))
-    matches = find_words(word_doc, user_query)
-    return f"Слово {user_query} встречается {len(matches)} раз"
+    document = load_text_from_word(file_path)
+    document_text = ' '.join(document)
+    print("Document Text:", document_text)  # Отладка
+    
+    #* Разделение на предложения
+    sentences = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', document_text)
+    print("Sentences:", sentences)  # Отладка
+
+    result = []
+    
+    #* Поиск ключевых слов и добавление номера предложения
+    for index, sentence in enumerate(sentences, start=1):
+        print("Checking Sentence:", sentence)  # Отладка
+        if user_query and user_query.lower() in sentence.lower():
+            result.append(f"{index}. {sentence}")
+    
+    return result
 
 file_path = "C:\\Users\\User-Максим\\Desktop\\LDA.docx"
 print(analyze_cluster(file_path))
