@@ -1,134 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
-    <link rel="stylesheet" type="text/css" href="/static/styles.css">  
+    <link rel="stylesheet" type="text/css" href="/static/styles.css">
     <title>Семантический лингвистический анализ текста</title>
 </head>
+
 <body>
-    <h1>Анализ семантики текста</h1>
 
-    <!-- Основной контейнер с колонками -->
     <div class="container">
-        <!-- Левая колонка с формой -->
-        <div class="sidebar">
-            <!-- Форма для загрузки файла и кнопки -->
-            <div class="center-container">
-                <form action="/analyze" method="post" enctype="multipart/form-data">
-                    <label for="file">Выберите файл (Word):</label>
-                    <input type="file" name="file" id="file" accept=".doc,.docx" required>
+        <h1>AI анализ учебных изданий</h1>
 
-                    <button type="submit">Анализировать</button>
-                </form>
-            </div>
+        <!-- Форма для анализа учебных изданий -->
+        <form action="/" method="post" enctype="multipart/form-data">
+            <label for="file-studybook">Выберите файл (PDF):</label>
+            <input type="file" name="file" id="file-studybook" accept=".pdf" required>
+            <button type="submit">Анализировать учебное издание</button>
+        </form>
 
-            <!-- Контейнер для ввода ключевых слов -->
-            <div class="keyword-container">
-                <h2>Ключевые слова</h2>
-                <label for="keywords">Введите ключевые слова:</label>
-                <textarea id="keywords" name="keywords" placeholder="Введите ключевые слова..."></textarea>
-                <!-- Кнопка для анализа ключевых слов -->
-                <button type="button" onclick="analyzeKeywords()">Проанализировать ключевые слова</button>
-            </div>
-            
-            <!-- Контейнер для отображения найденных слов -->
-            <div class="found-words-container" id="found-words-container">
-                <h3>Ключевые слова в предложениях:</h3>
-                <!-- Здесь будут отображаться найденные слова -->
-                <div id="found-words"></div>
-            </div>
-        </div>
+        <!-- Результаты анализа учебных изданий -->
+        {% if style_result %}
+            <h2>Стиль текста:</h2>
+            <pre>{{ style_result }}</pre>
+        {% endif %}
+        
+        {% if coherence_result %}
+            <h2>Результаты анализа связности:</h2>
+            <pre>{{ coherence_result }}</pre>
+        {% endif %}
 
-        <!-- Правая колонка для результатов анализа -->
-        <div class="content">
-            <hr>
+        {% if structure_result %}
+            <h2>Результаты анализа структуры:</h2>
+            <pre>{{ structure_result }}</pre>
+        {% endif %}
 
-            <!-- Результаты анализа -->
-            {% if cluster_result %}
-            <h2>Результаты текстового анализа:</h2>
-            <table class="results-table">
-                <thead>
-                    <tr><th>Показатель</th><th>Результат</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Количество вводных или лишних фраз</td><td>{{ cluster_result.num_cluster_phrases }}</td></tr>
-                    <tr><td>Средняя длина предложения</td><td>{{ "{:.2f}".format(cluster_result.avg_sentence_len) }} слов</td></tr>
-                    <tr><td>Наиболее часто используемые слова</td><td>{{ cluster_result.most_common_words }}</td></tr>
-                    <tr><td>Оценка загроможденности текста</td><td>{{ "{:.2f}".format(cluster_result.clutter_score) }}</td></tr>
-                    <tr><td>Интерпретация оценки загроможденности текста</td><td>{{ cluster_result.clutter_mark }}</td></tr>
-                </tbody>
-            </table>
-            {% endif %}
-
-            {% if topics_result %}
-            <h2>Результаты анализа тем:</h2>
-            <h4>Количество тем: {{ topics_result.topic_count }}</>
-            <table class="results-table">
-                <thead>
-                    <tr><th>Тема</th><th>Ключевые слова</th></tr>
-                </thead>
-                <tbody>
-                    {% for topic_id, keywords in topics_result.topic_keywords.items() %}
-                    <tr><td>Тема {{ topic_id + 1 }}</td><td>{{ keywords | join(', ') }}</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% endif %}    
-
-            {% if sentiment_result %}
-            <h2>Результаты анализа настроения:</h2>
-            <table class="results-table">
-                <thead>
-                    <tr><th>Варианты</th><th>Результат</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Позитивное/Отрицательное/Нейтральное</td><td>{{ sentiment_result }}</td></tr>
-                </tbody>
-            </table>
-            {% endif %}       
-        </div>
+        {% if grammar_result %}
+            <h2>Результаты проверки грамматики:</h2>
+            <pre>{{ grammar_result }}</pre>
+        {% endif %}
     </div>
-    <script>
-        async function analyzeKeywords() {
-            const keyword = document.getElementById('keywords').value.trim();
-            const keywords = keyword.split(/\s+/); // Разделяем ключевые слова по пробелам
-            const foundWordsContainer = document.getElementById('found-words');
-            foundWordsContainer.innerHTML = '';
-    
-            try {
-                const response = await fetch('/search', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_query: keywords })
-                });
-                const data = await response.json();
-    
-                if (data.matches.length > 0) {
-                    data.matches.forEach(sentence => {
-                        let highlightedSentence = sentence;
-                        keywords.forEach(kw => {
-                            const regex = new RegExp(`(${kw})`, 'gi');
-                            highlightedSentence = highlightedSentence.replace(regex, '<span class="highlight">$1</span>');
-                        });
-    
-                        const div = document.createElement('div');
-                        div.innerHTML = highlightedSentence;
-                        foundWordsContainer.appendChild(div);
-                    });
-                } else {
-                    foundWordsContainer.textContent = 'Ключевое слово не найдено.';
-                }
-            } catch (error) {
-                console.error('Ошибка при запросе:', error);
-                foundWordsContainer.textContent = 'Произошла ошибка при поиске.';
-            }
-        }
-    </script>
-    
+
 </body>
 </html>
+
+
+
+
+
 
 
 
