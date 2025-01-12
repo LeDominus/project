@@ -1,19 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
-    <link rel="stylesheet" type="text/css" href="/static/styles.css">
-    <title>Семантический лингвистический анализ текста</title>
+    <link rel="stylesheet" type="text/css" href="/project/static/styles.css">
+    <title>Анализ текста с помощью ИИ</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-y: auto; /* Автоматическая прокрутка страницы */
+        }
+
+        .container {
+            padding: 20px;
+            max-height: 100vh; /* Ограничиваем высоту контейнера */
+            overflow-y: auto; /* Прокрутка внутри контейнера */
+        }
+
+        /* Индикатор загрузки */
+        #loading {
+            display: none;
+            text-align: center;
+        }
+
+        /* Спиннер */
+        .spinner {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+    </style>
 </head>
 
 <body>
 
     <div class="container">
         <h1>AI анализ учебных изданий</h1>
-
         <!-- Форма для анализа учебных изданий -->
         <form action="/" method="post" enctype="multipart/form-data">
             <label for="file-studybook">Выберите файл (PDF):</label>
@@ -21,30 +54,45 @@
             <button type="submit">Анализировать учебное издание</button>
         </form>
 
+        <!-- Индикатор загрузки -->
+        <div id="loading">
+            <div class="spinner"></div>
+            <p>Загрузка результатов...</p>
+        </div>
+
         <!-- Результаты анализа учебных изданий -->
         {% if style_result %}
             <h2>Стиль текста:</h2>
-            <pre>{{ style_result }}</pre>
+            <p>{{ style_result }}</p>
+        {% endif %}
+        
+        {% if structure_result %}
+            <h2>Результаты анализа структуры:</h2>
+            <p>{{ structure_result }}</p>
+            <p>{{ structure_interpret }}</p>
         {% endif %}
         
         {% if coherence_result %}
-            <h2>Результаты анализа связности:</h2>
-            <pre>{{ coherence_result }}</pre>
+            <h2>Когерентность текста</h2>
+            <p>Коэффициент когерентности: {{ coherence_result }}</p>
+            <p>Интерпретация: {{ coherence_interpretation }}</p>
         {% endif %}
 
-        {% if structure_result %}
-            <h2>Результаты анализа структуры:</h2>
-            <pre>{{ structure_result }}</pre>
+        {% if read_result %}
+            <h2>Оценка сложности текста</h2>
+            <p>Индекс Флеша: {{ flesch_score }},</p>
+            <p>Индекс Ганнинга: {{ gunning_score }},</p>
+            <p>Количество предложений: {{ sentences }},</p>
+            <p>Количество слов: {{ words }},</p>
+            <p>Количество слогов: {{ syllables }},</p>
+            <p>Сложность текста: {{ readability }},</p>
         {% endif %}
-
-        {% if grammar_result %}
-            <h2>Результаты проверки грамматики:</h2>
-            <pre>{{ grammar_result }}</pre>
-        {% endif %}
+    
     </div>
 
 </body>
 </html>
+
 
 
 

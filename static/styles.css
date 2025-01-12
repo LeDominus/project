@@ -2,6 +2,7 @@
 body, html {
     height: 100%;
     margin: 0;
+    padding: 0;
     font-family: Arial, sans-serif;
 }
 
@@ -22,6 +23,10 @@ form {
     flex-direction: column;
     align-items: center;
     margin-bottom: 20px;
+}
+
+form input, form button {
+    margin-bottom: 10px;
 }
 
 input[type="file"] {
@@ -47,6 +52,30 @@ pre {
 h2 {
     margin-top: 20px;
 }
+
+/* Стили для анимации спиннера */
+.spinner {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+}
+
+/* Анимация вращения */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Стили для блока загрузки */
+#loading {
+    text-align: center;
+    padding: 20px;
+    min-height: 100px;
+}
+
 
 
 
